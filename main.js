@@ -1,10 +1,44 @@
-// Add imports here
+// Added imports here
+const BIP39 = require("bip39")
+const hdkey = require('ethereumjs-wallet/hdkey')
+const Wallet = require('ethereumjs-wallet')
+const keccak256 = require('js-sha3').keccak256;
+const EthereumTx = require('ethereumjs-tx')
 
 
+// Generates a random mnemonic (uses crypto.randomBytes under the hood), defaults to 128-bits of entropy
+function generateMnemonic() {
+    return BIP39.generateMnemonic()
+}
 
-// Add functions here
+function generateSeed() {
+    return BIP39.mnemonicToSeed(mnenomic)
+}
 
+function generatePrivKey(mnemonic){
+    const seed = generateSeed(mnemonic)
+    return hdkey.fromMasterSeed(seed).derivePath(`m/44'/60'/0'/0/0`).getWallet().getPrivateKey()
+}
+function derivePubKey(privKey){
+    const wallet = Wallet.fromPrivateKey(privKey)    
+    return wallet.getPublicKey()
+}
+function deriveEthAddress(pubKey) {
+    const address = keccak256(pubKey) // hash of pub key
+    // we get the last 20 bytes to get the public key
+    return "0x" + address.substring(address.length - 40, address.length)
+}
 
+function signTx(privKey, txData) {
+    const tx = new EthereumTx(txData)
+    tx.sign(privKey)
+    return tx
+}
+
+function getSignerAddress(signedTx){
+    return "0x" + signedTx.getSenderAddress().toString('hex')
+}
+var isValid = BIP39.validateMnemonic("Enter your mnemonic here")
 
 /*
 
